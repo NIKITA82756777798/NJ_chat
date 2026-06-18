@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новостной мессенджер</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #0b0f1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .messenger {
+            max-width: 1100px;
+            width: 100%;
+            background: #141b2b;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+            transition: all 0.2s;
+        }
+
+        .header {
+            padding: 24px 28px;
+            background: rgba(20, 27, 43, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #d6e4ff, #a0c2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            -webkit-text-fill-color: #8aa4d8;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .controls {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cdddf5;
+            padding: 10px 22px;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .controls button:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 20, 80, 0.4);
+        }
+
+        .controls button:active {
+            transform: scale(0.96);
+        }
+
+        .news-feed {
+            padding: 20px 24px 30px;
+            max-height: 640px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            scroll-behavior: smooth;
+        }
+
+        .news-feed::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .news-feed::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .news-feed::-webkit-scrollbar-thumb {
+            background: #2f3d5e;
+            border-radius: 10px;
+        }
+
+        .news-card {
+            background: #1a2337;
+            border-radius: 24px;
+            padding: 18px 22px 22px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            transition: 0.2s ease;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            backdrop-filter: blur(2px);
+        }
+
+        .news-card:hover {
+            background: #1f2b42;
+            border-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.6);
+        }
+
+        .news-img {
+            width: 110px;
+            height: 110px;
+            border-radius: 18px;
+            object-fit: cover;
+            background: #0d1422;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: 0.2s;
+        }
+
+        .news-content {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .news-title {
+            color: #ebf2ff;
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            letter-spacing: -0.2px;
+        }
+
+        .news-desc {
+            color: #b0c7ec;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #7086b0;
+            font-size: 0.8rem;
+            letter-spacing: 0.2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 12px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .news-source {
+            background: rgba(80, 120, 255, 0.08);
+            padding: 4px 16px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            color: #9ab2e6;
+        }
+
+        .news-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge {
+            background: rgba(255, 200, 50, 0.08);
+            padding: 2px 14px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            border: 1px solid rgba(255, 200, 50, 0.1);
+            color: #dbb86a;
+        }
+
+        .footer {
+            padding: 14px 28px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: space-between;
+            color: #4c6085;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .footer span {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 2px 14px;
+            border-radius: 100px;
+        }
+
+        @media (max-width: 650px) {
+            .news-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .news-img {
+                width: 100%;
+                height: 180px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="messenger">
+        <div class="header">
+            <h1>
+                📰 Мессенджер
+                <span>live</span>
+            </h1>
+            <div class="controls">
+                <button id="refreshBtn">🔄 Случайные</button>
+                <button id="shuffleBtn">🎲 Перетасовать</button>
+            </div>
+        </div>
+
+        <div class="news-feed" id="newsFeed"></div>
+
+        <div class="footer">
+            <span>📡 500+ новостей</span>
+            <span>⚡ обновлено: <span id="timeStamp">только что</span></span>
+        </div>
+    </div>
+    <script>
+        (function() {
+            // ---------- ГЕНЕРАЦИЯ 500+ НОВОСТЕЙ С КАРТИНКАМИ ----------
+            const newsTitles = [
+                "Квантовый скачок в облачных вычислениях", "ИИ научился предсказывать погоду на 30 дней",
+                "Новая эра в лечении диабета", "Китай запустил лунную базу нового поколения",
+                "Роботы-хирурги провели 10 000 операций", "В США одобрен первый препарат от старения",
+                "Европа переходит на зелёный водород", "Туризм на Марсе: первые билеты проданы",
+                "Создан материал прочнее алмаза", "Криптовалюта достигла исторического максимума",
+                "Глобальное потепление: новый отчёт ООН", "Самый мощный телескоп зафиксировал аномалию",
+                "В Японии открыли «умный» город будущего", "Электромобили обогнали бензиновые продажи",
+                "Нейросеть написала роман-бестселлер", "Коронавирус побеждён? Новое заявление ВОЗ",
+                "Индия запустила спутник для мониторинга океана", "Найдена планета, похожая на Землю",
+                "Биткоин обновил рекорд волатильности", "Илон Маск анонсировал нейрочип следующего поколения",
+                "Солнечная энергия стала дешевле угля", "Самый быстрый поезд побил рекорд скорости",
+                "Искусственный интеллект в искусстве", "Учёные создали живую кожу для роботов",
+                "Голосовой помощник теперь понимает эмоции", "Туристы полетят на орбиту уже в 2026",
+                "В Австралии нашли древнейшие окаменелости", "Apple представила гарнитуру смешанной реальности",
+                "Google запускает квантовый компьютер", "В России разработан сверхпрочный пластик",
+                "Авиация переходит на биотопливо", "Новый метод опреснения воды даст доступ к питьевой",
+                "Умные очки заменят смартфоны", "Чат-боты стали лучшими консультантами",
+                "Генетический тест предскажет болезни за 20 лет", "Экологичный бетон из переработанных отходов",
+                "Стартап из Силиконовой долины привлёк $5 млрд", "В Корее создали дисплей с разрешением 16K",
+                "Беспилотники доставляют почту в отдалённые районы", "Найден способ замедлить старение кожи",
+                "Крупнейший дата-центр построят в Арктике", "В Европе запретили пластиковые упаковки",
+                "Спутниковый интернет доступен по всему миру", "Мозговой имплант восстановил зрение",
+                "Нанороботы в крови: первый успешный тест", "В Японии роботы заменяют учителей",
+                "Астрономы обнаружили новую галактику", "В Дубае открыли вертикальный лес",
+                "Термоядерный реактор дал первую энергию", "Умные контактные линзы следят за здоровьем",
+                "Правительство запускает цифровой паспорт", "Крупнейшее озеро планеты высыхает",
+                "ВИЧ побеждён: новые данные", "NASA нанимает астронавтов для миссии на Марс",
+                "Создана молекула, останавливающая рак", "В Африке строят стену из деревьев",
+                "Телепортация данных стала реальностью", "Самый высокий небоскрёб откроют в 2027",
+                "Робот-андроид сдал экзамен по физике", "Ежедневные новости из мира технологий",
+                "Курс доллара упал до рекордного уровня", "Найден способ извлечения воды из марсианской почвы",
+                "Учёные создали самовосстанавливающийся металл", "Космический корабль Starship готов к полёту",
+                "Пандемия закончилась: что дальше?", "Google и Microsoft объединили облака",
+                "Бионические протезы теперь чувствуют прикосновения", "Запущен первый рекламный робот-дрон",
+                "Сверхзвуковые самолёты вернутся через год", "В Амазонии нашли неизвестное племя",
+                "Китай построит солнечную электростанцию в космосе", "Рестораны будущего: 3D-печать еды",
+                "Новая эра в лечении паралича", "В Швеции открыли подземный город"
+            ];
+
+            // расширяем до 500+ (дублируем с вариациями)
+            const baseTitles = [...newsTitles];
+            while (baseTitles.length < 550) {
+                const extra = baseTitles.slice(0, 50).map(t => t + " (обновлено)");
+                baseTitles.push(...extra);
+            }
+            // берём ровно 520 уникальных заголовков (на всякий случай)
+            const finalTitles = [];
+            const seen = new Set();
+            for (let t of baseTitles) {
+                if (!seen.has(t) && finalTitles.length < 520) {
+                    seen.add(t);
+                    finalTitles.push(t);
+                }
+            }
+            while (finalTitles.length < 500) {
+                finalTitles.push("🔥 Технологический прорыв в энергетике #" + (finalTitles.length + 1));
+            }
+
+            // источники
+            const sources = ["ТАСС", "РИА Новости", "BBC News", "CNN", "Reuters", "Al Jazeera", "DW", "FT", "Bloomberg", "TechCrunch", "Wired", "The Verge", "Engadget", "CNBC", "AP News", "AFP", "Xinhua", "Kyodo", "ANSA", "DPA"];
+
+            // 40+ картинок из интернета (рандомные, тематические)
+            const imagePool = [
+                "https://picsum.photos/seed/1/400/300", "https://picsum.photos/seed/2/400/300",
+                "https://picsum.photos/seed/3/400/300", "https://picsum.photos/seed/4/400/300",
+                "https://picsum.photos/seed/5/400/300", "https://picsum.photos/seed/6/400/300",
+                "https://picsum.photos/seed/7/400/300", "https://picsum.photos/seed/8/400/300",
+                "https://picsum.photos/seed/9/400/300", "https://picsum.photos/seed/10/400/300",
+                "https://picsum.photos/seed/11/400/300", "https://picsum.photos/seed/12/400/300",
+                "https://picsum.photos/seed/13/400/300", "https://picsum.photos/seed/14/400/300",
+                "https://picsum.photos/seed/15/400/300", "https://picsum.photos/seed/16/400/300",
+                "https://picsum.photos/seed/17/400/300", "https://picsum.photos/seed/18/400/300",
+                "https://picsum.photos/seed/19/400/300", "https://picsum.photos/seed/20/400/300",
+                "https://picsum.photos/seed/21/400/300", "https://picsum.photos/seed/22/400/300",
+                "https://picsum.photos/seed/23/400/300", "https://picsum.photos/seed/24/400/300",
+                "https://picsum.photos/seed/25/400/300", "https://picsum.photos/seed/26/400/300",
+                "https://picsum.photos/seed/27/400/300", "https://picsum.photos/seed/28/400/300",
+                "https://picsum.photos/seed/29/400/300", "https://picsum.photos/seed/30/400/300",
+                "https://picsum.photos/seed/31/400/300", "https://picsum.photos/seed/32/400/300",
+                "https://picsum.photos/seed/33/400/300", "https://picsum.photos/seed/34/400/300",
+                "https://picsum.photos/seed/35/400/300", "https://picsum.photos/seed/36/400/300",
+                "https://picsum.photos/seed/37/400/300", "https://picsum.photos/seed/38/400/300",
+                "https://picsum.photos/seed/39/400/300", "https://picsum.photos/seed/40/400/300",
+                "https://picsum.photos/seed/41/400/300", "https://picsum.photos/seed/42/400/300",
+                "https://picsum.photos/seed/43/400/300", "https://picsum.photos/seed/44/400/300",
+                "https://picsum.photos/seed/45/400/300", "https://picsum.photos/seed/46/400/300",
+                "https://picsum.photos/seed/47/400/300", "https://picsum.photos/seed/48/400/300",
+                "https://picsum.photos/seed/49/400/300", "https://picsum.photos/seed/50/400/300",
+                "https://picsum.photos/seed/51/400/300", "https://picsum.photos/seed/52/400/300"
+            ];
+
+            function getRandomImage() {
+                return imagePool[Math.floor(Math.random() * imagePool.length)];
+            }
+
+            // функция для генерации одной новости
+            function generateNewsItem(index) {
+                const title = finalTitles[index % finalTitles.length];
+                // Описание: разнообразим
+                const descOptions = [
+                    "По данным источника, событие имеет глобальное значение и повлияет на экономику.",
+                    "Эксперты обсуждают последствия этого решения в ближайшие годы.",
+                    "Технологический прорыв открывает новые горизонты для науки.",
+                    "Специалисты уже готовятся к внедрению в промышленности.",
+                    "Ожидается, что это изменит подход к лечению и диагностике.",
+                    "Разработка получила высокую оценку международного сообщества.",
+                    "Инвестиции в проект составили рекордную сумму.",
+                    "Первые тесты показали впечатляющие результаты.",
+                    "Учёные называют это самым значимым открытием десятилетия.",
+                    "Рынок отреагировал стремительным ростом акций компаний."
+                ];
+                const desc = descOptions[Math.floor(Math.random() * descOptions.length)];
+                const source = sources[Math.floor(Math.random() * sources.length)];
+                const time = new Date(Date.now() - Math.floor(Math.random() * 86400000 * 5));
+                const timeStr = time.toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
+                const img = getRandomImage();
+                return {
+                    id: index,
+                    title: title,
+                    description: desc,
+                    source: source,
+                    time: timeStr,
+                    image: img
+                };
+            }
+
+            // создаём массив из 520 новостей (больше 500)
+            let newsDatabase = [];
+            for (let i = 0; i < 520; i++) {
+                newsDatabase.push(generateNewsItem(i));
+            }
+
+            // текущий отображаемый массив (15-20 новостей)
+            let displayedNews = [];
+
+            // элементы DOM
+            const feed = document.getElementById('newsFeed');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const shuffleBtn = document.getElementById('shuffleBtn');
+            const timeSpan = document.getElementById('timeStamp');
+
+            // Рендер
+            function renderNews(newsArray) {
+                feed.innerHTML = '';
+                newsArray.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'news-card';
+
+                    const img = document.createElement('img');
+                    img.className = 'news-img';
+                    img.src = item.image;
+                    img.alt = 'новость';
+                    img.loading = 'lazy';
+                    img.onerror = function() { this.src = 'https://picsum.photos/seed/error/400/300'; };
+
+                    const content = document.createElement('div');
+                    content.className = 'news-content';
+
+                    const title = document.createElement('div');
+                    title.className = 'news-title';
+                    title.textContent = item.title;
+
+                    const desc = document.createElement('div');
+                    desc.className = 'news-desc';
+                    desc.textContent = item.description;
+
+                    const meta = document.createElement('div');
+                    meta.className = 'news-meta';
+                    const sourceSpan = document.createElement('span');
+                    sourceSpan.className = 'news-source';
+                    sourceSpan.textContent = '📰 ' + item.source;
+                    const timeSpanEl = document.createElement('span');
+                    timeSpanEl.className = 'news-time';
+                    timeSpanEl.innerHTML = `🕒 ${item.time}`;
+                    const badge = document.createElement('span');
+                    badge.className = 'badge';
+                    badge.textContent = '✦ новое';
+
+                    meta.appendChild(sourceSpan);
+                    meta.appendChild(timeSpanEl);
+                    meta.appendChild(badge);
+
+                    content.appendChild(title);
+                    content.appendChild(desc);
+                    content.appendChild(meta);
+
+                    card.appendChild(img);
+                    card.appendChild(content);
+                    feed.appendChild(card);
+                });
+                // обновим таймштамп
+                const now = new Date();
+                timeSpan.textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+
+            // выборка случайных 18 новостей из базы
+            function getRandomSubset(count = 18) {
+                const shuffled = [...newsDatabase];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled.slice(0, count);
+            }
+
+            // полная перетасовка с новым набором
+            function refreshFeed() {
+                displayedNews = getRandomSubset(18);
+                renderNews(displayedNews);
+            }
+
+            // перемешивание текущих (без изменения состава, просто порядок)
+            function shuffleDisplayed() {
+                if (displayedNews.length === 0) {
+                    refreshFeed();
+                    return;
+                }
+                for (let i = displayedNews.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [displayedNews[i], displayedNews[j]] = [displayedNews[j], displayedNews[i]];
+                }
+                renderNews(displayedNews);
+            }
+
+            // инициализация
+            function init() {
+                displayedNews = getRandomSubset(18);
+                renderNews(displayedNews);
+                // кнопки
+                refreshBtn.addEventListener('click', refreshFeed);
+                shuffleBtn.addEventListener('click', shuffleDisplayed);
+            }
+
+            init();
+
+            // дополнительно — обновление времени каждые 30 сек (для красоты)
+            setInterval(() => {
+                const now = new Date();
+                timeSpan.textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }, 30000);
+
+        })();
+    </script>
+</body>
+</html>
